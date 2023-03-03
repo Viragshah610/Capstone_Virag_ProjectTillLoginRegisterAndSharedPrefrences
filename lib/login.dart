@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:app/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
+  //const Login({Key? key}) : super(key: key);
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -15,28 +17,38 @@ class _LoginPageState extends State<Login> {
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
   Future login() async {
-    var url = Uri.http("192.168.245.11", '/flutter_app/login.php', {'q': '{http}'});
+    var url = Uri.http("192.168.125.11", '/flutter_app/login.php', {'q': '{http}'});
     var response = await http.post(url, body: {
       "username": username.text,
       "password": password.text,
-    });
-    var data = json.decode(response.body);
-    if (data.toString() == "Success") {
-      Fluttertoast.showToast(
-        msg: 'Login Successful',
-        backgroundColor: Colors.green,
-        textColor: Colors.white,
-        toastLength: Toast.LENGTH_SHORT,
-      );
-      Navigator.of(context).push(MaterialPageRoute(builder: (context)=>home()));
 
-    } else {
+    });
+
+    var data = json.decode(response.body);
+
+    if (data.toString() == "Error") {
+
       Fluttertoast.showToast(
         backgroundColor: Colors.red,
         textColor: Colors.white,
         msg: 'Username and password invalid',
         toastLength: Toast.LENGTH_SHORT,
       );
+      /*Navigator.of(context).push(MaterialPageRoute(builder: (context)=>home(widget.id)));*/
+
+    } else {
+
+        SharedPreferences preferences=await SharedPreferences.getInstance();
+        preferences.setString('id', data['id']);
+        preferences.setString('username', data['username']);
+        preferences.setString('name', data['name']);
+        preferences.setString('email', data['email']);
+        preferences.setString('phone', data['phone']);
+        preferences.setString('pincode', data['pincode']);
+        preferences.setString('city', data['city']);
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return home();
+      },));
     }
   }
 

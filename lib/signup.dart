@@ -4,7 +4,7 @@ import 'package:app/login.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:shared_preferences/shared_preferences.dart';
 
   //const signup({Key? key}) : super(key: key);
   class signup extends StatefulWidget {
@@ -24,7 +24,7 @@ import 'package:http/http.dart' as http;
   TextEditingController password=new TextEditingController();
 
   Future signup() async {
-    var url = Uri.http("192.168.245.11", '/flutter_app/register.php', {'q': '{http}'});
+    var url = Uri.http("192.168.125.11", '/flutter_app/register.php', {'q': '{http}'});
     var response = await http.post(url, body: {
       "username": username.text.toString(),
       "name": name.text.toString(),
@@ -33,8 +33,12 @@ import 'package:http/http.dart' as http;
       "pincode": pincode.text.toString(),
       "city": city.text.toString(),
       "password": password.text.toString(),
+
   });
+
+
   var data = json.decode(response.body);
+
   if (data == "Error") {
   Fluttertoast.showToast(
   backgroundColor: Colors.orange,
@@ -50,9 +54,20 @@ import 'package:http/http.dart' as http;
   msg: 'Registration Successful',
   toastLength: Toast.LENGTH_SHORT
   );
-  Navigator.push(context,MaterialPageRoute(builder:(context)=>home(),),);
+  SharedPreferences pref= await SharedPreferences.getInstance();
+  pref.setString("username", username.text);
+  pref.setString("name", name.text);
+  pref.setString("email", email.text);
+  pref.setString("phone", phone.text);
+  pref.setString("pincode", pincode.text);
+  pref.setString("city", city.text);
+  Navigator.push(context, MaterialPageRoute(builder: (context) {
+    return home();
+  },));
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
